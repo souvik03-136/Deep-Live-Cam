@@ -7,13 +7,14 @@ import modules.globals
 
 logger = logging.getLogger(__name__)
 
-def find_cluster_centroids(embeddings, max_k=10) -> Any:
+def find_cluster_centroids(embeddings, max_k=None, kmeans_init=None) -> Any:
     """
     Identifies optimal face clusters using KMeans and silhouette scoring
     
     Args:
         embeddings: Face embedding vectors
-        max_k: Maximum number of clusters to consider
+        max_k: Maximum number of clusters to consider (default: from globals)
+        kmeans_init: KMeans initialization method (default: from globals)
         
     Returns:
         Array of optimal cluster centroids
@@ -23,9 +24,11 @@ def find_cluster_centroids(embeddings, max_k=10) -> Any:
             logger.warning("Not enough embeddings for clustering analysis")
             return embeddings  # Return the single embedding as its own cluster
             
-        # Use settings from globals if available
-        max_k = getattr(modules.globals, 'max_cluster_k', max_k)
-        kmeans_init = getattr(modules.globals, 'kmeans_init', 'k-means++')
+        # Use settings from globals if not explicitly provided
+        if max_k is None:
+            max_k = getattr(modules.globals, 'max_cluster_k', 10)
+        if kmeans_init is None:
+            kmeans_init = getattr(modules.globals, 'kmeans_init', 'k-means++')
         
         # Try silhouette method first
         best_k = 2  # Start with minimum viable cluster count

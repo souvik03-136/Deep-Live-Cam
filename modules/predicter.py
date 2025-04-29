@@ -41,12 +41,13 @@ def get_nsfw_model():
         _model = load_nsfw_model()
     return _model
 
-def predict_frame(target_frame: Frame) -> bool:
+def predict_frame(target_frame: Frame, threshold=None) -> bool:
     """
     Predict if a frame contains NSFW content
     
     Args:
         target_frame: Frame to analyze as numpy array
+        threshold: NSFW probability threshold (default: from globals)
         
     Returns:
         True if NSFW content detected, False otherwise
@@ -56,8 +57,9 @@ def predict_frame(target_frame: Frame) -> bool:
             logger.warning("Cannot predict on None frame")
             return False
             
-        # Get threshold from globals
-        threshold = getattr(modules.globals, 'nsfw_threshold', 0.85)
+        # Get threshold from globals if not explicitly provided
+        if threshold is None:
+            threshold = getattr(modules.globals, 'nsfw_threshold', 0.85)
         
         # Convert the frame to RGB if needed
         expected_format = 'RGB' if modules.globals.color_correction else 'BGR'
@@ -86,35 +88,39 @@ def predict_frame(target_frame: Frame) -> bool:
         logger.error(f"Error during NSFW prediction: {str(e)}")
         return False
 
-def predict_image(target_path: str) -> bool:
+def predict_image(target_path: str, threshold=None) -> bool:
     """
     Predict if an image file contains NSFW content
     
     Args:
         target_path: Path to image file
+        threshold: NSFW probability threshold (default: from globals)
         
     Returns:
         True if NSFW content detected, False otherwise
     """
     try:
-        threshold = getattr(modules.globals, 'nsfw_threshold', 0.85)
+        if threshold is None:
+            threshold = getattr(modules.globals, 'nsfw_threshold', 0.85)
         return opennsfw2.predict_image(target_path) > threshold
     except Exception as e:
         logger.error(f"Error predicting NSFW for image {target_path}: {str(e)}")
         return False
 
-def predict_video(target_path: str) -> bool:
+def predict_video(target_path: str, threshold=None) -> bool:
     """
     Predict if a video file contains NSFW content
     
     Args:
         target_path: Path to video file
+        threshold: NSFW probability threshold (default: from globals)
         
     Returns:
         True if NSFW content detected, False otherwise
     """
     try:
-        threshold = getattr(modules.globals, 'nsfw_threshold', 0.85)
+        if threshold is None:
+            threshold = getattr(modules.globals, 'nsfw_threshold', 0.85)
         _, probabilities = opennsfw2.predict_video_frames(
             video_path=target_path, 
             frame_interval=100

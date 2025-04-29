@@ -32,7 +32,9 @@ def get_video_frame(video_path: str, frame_number: int = 0) -> Optional[Any]:
             capture.set(cv2.CAP_PROP_CONVERT_RGB, 0)  # Explicitly disable if not needed
         
         frame_total = capture.get(cv2.CAP_PROP_FRAME_COUNT)
-        capture.set(cv2.CAP_PROP_POS_FRAMES, min(frame_total, frame_number - 1))
+        # Ensure frame_number is valid (0-based index)
+        target_frame = max(0, min(frame_total - 1, frame_number))
+        capture.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
         has_frame, frame = capture.read()
 
         # Only convert manually if color_correction is enabled but capture didn't handle it

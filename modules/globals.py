@@ -68,6 +68,14 @@ max_cluster_k = DEFAULT_SETTINGS['max_cluster_k']
 kmeans_init = DEFAULT_SETTINGS['kmeans_init']
 nsfw_threshold = DEFAULT_SETTINGS['nsfw_threshold']
 
+def init() -> None:
+    """
+    Initialize the globals module and load settings
+    Should be called explicitly by the application during startup
+    """
+    load_settings()
+    logger.info("Globals module initialized")
+
 def load_settings() -> None:
     """
     Load user settings from config file
@@ -114,5 +122,5 @@ def save_settings() -> None:
     except Exception as e:
         logger.error(f"Error saving settings: {str(e)}")
 
-# Load settings at module import time
-load_settings()
+# Don't load settings at import time to avoid side effects
+# Will be called explicitly by the application's initialization
